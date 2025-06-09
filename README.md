@@ -1,5 +1,7 @@
 # OMES Banking System
 
+Discord: https://discord.gg/dATEunPQ2t
+
 A comprehensive banking system for FiveM servers that supports both ESX and QB Core frameworks.
 
 ## Features
