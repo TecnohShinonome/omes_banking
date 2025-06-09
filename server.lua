@@ -1,4 +1,3 @@
--- Framework Detection and Compatibility Layer
 local Framework = nil
 local FrameworkName = Config.Framework
 
@@ -8,7 +7,7 @@ elseif FrameworkName == 'qb' then
     Framework = exports['qb-core']:GetCoreObject()
 end
 
--- Framework compatibility functions
+
 local function GetPlayer(source)
     if FrameworkName == 'esx' then
         return Framework.GetPlayerFromId(source)
@@ -101,7 +100,6 @@ local function FormatMoney(amount)
     if FrameworkName == 'esx' then
         return Framework.Math.GroupDigits(amount)
     elseif FrameworkName == 'qb' then
-        -- QBCore doesn't have CommaValue in Shared, so we'll create our own formatting
         local formatted = tostring(amount)
         local k
         while true do
@@ -114,12 +112,12 @@ local function FormatMoney(amount)
     end
 end
 
--- Notification function
+
 function SendNotification(source, message, type)
-    type = type or 'info' -- Default type
+    type = type or 'info'
     
     if Config.NotificationType == 'ox' then
-        -- OX lib notification
+
         TriggerClientEvent('ox_lib:notify', source, {
             title = 'Banking',
             description = message,
@@ -127,21 +125,21 @@ function SendNotification(source, message, type)
             duration = 5000
         })
     elseif Config.NotificationType == 'esx' then
-        -- ESX notification
+
         TriggerClientEvent('esx:showNotification', source, message)
     elseif Config.NotificationType == 'qb' then
-        -- QB Core notification
+
         TriggerClientEvent('QBCore:Notify', source, message, type, 5000)
     end
 end
 
--- Discord Webhook Logging Function
+
 function SendDiscordLog(logType, title, description, fields, color)
     if not Config.DiscordLogging.enabled or not Config.DiscordLogging.webhook or Config.DiscordLogging.webhook == "" then
         return
     end
     
-    -- Check if this log type is enabled
+
     if not Config.DiscordLogging.logEvents[logType] then
         return
     end
@@ -171,22 +169,22 @@ function SendDiscordLog(logType, title, description, fields, color)
     })
 end
 
--- Get player data callback
+
 RegisterCallback('omes_banking:getPlayerData', function(source, cb)
     local xPlayer = GetPlayer(source)
     if not xPlayer then return cb(nil) end
     
     local identifier = GetPlayerIdentifier(xPlayer)
     
-    -- Get savings account data
+
     MySQL.Async.fetchScalar('SELECT balance FROM banking_savings WHERE identifier = @identifier AND status = "active"', {
         ['@identifier'] = identifier
     }, function(savingsBalance)
-        -- Check if savings account exists
+
         MySQL.Async.fetchScalar('SELECT status FROM banking_savings WHERE identifier = @identifier', {
             ['@identifier'] = identifier
         }, function(savingsStatus)
-            -- Get PIN data
+
             MySQL.Async.fetchScalar('SELECT pin FROM banking_pins WHERE identifier = @identifier', {
                 ['@identifier'] = identifier
             }, function(pin)
@@ -207,7 +205,7 @@ RegisterCallback('omes_banking:getPlayerData', function(source, cb)
     end)
 end)
 
--- Get transaction history callback
+
 RegisterCallback('omes_banking:getTransactionHistory', function(source, cb)
     local xPlayer = GetPlayer(source)
     if not xPlayer then return cb({}) end
@@ -233,28 +231,28 @@ RegisterCallback('omes_banking:getTransactionHistory', function(source, cb)
     end)
 end)
 
--- Get balance history for chart
+
 RegisterCallback('omes_banking:getBalanceHistory', function(source, cb)
     local xPlayer = GetPlayer(source)
     if not xPlayer then return cb({}) end
     
     local identifier = GetPlayerIdentifier(xPlayer)
     
-    -- Get transactions from the last 7 days, ordered by date ASC for calculation
+
     MySQL.Async.fetchAll('SELECT * FROM banking_transactions WHERE identifier = @identifier AND date >= DATE_SUB(NOW(), INTERVAL 7 DAY) ORDER BY date ASC', {
         ['@identifier'] = identifier
     }, function(result)
         local balanceHistory = {}
         local currentBalance = GetPlayerBank(xPlayer)
         
-        -- Generate the last 7 days (including today)
+
         local days = {}
         for i = 6, 0, -1 do
             local date = os.date('%Y-%m-%d', os.time() - (i * 24 * 60 * 60))
             table.insert(days, date)
         end
         
-        -- If no transactions in last 7 days, return current balance for all days
+
         if #result == 0 then
             for _, date in ipairs(days) do
                 table.insert(balanceHistory, {
@@ -265,10 +263,10 @@ RegisterCallback('omes_banking:getBalanceHistory', function(source, cb)
             return cb(balanceHistory)
         end
         
-        -- Calculate balance at each transaction point (working backwards from current balance)
+
         local tempBalance = currentBalance
         
-        -- First, calculate what the balance was at the start by reversing all transactions
+
         for i = #result, 1, -1 do
             local transaction = result[i]
             if transaction.type == 'deposit' or transaction.type == 'transfer_in' then
@@ -280,26 +278,26 @@ RegisterCallback('omes_banking:getBalanceHistory', function(source, cb)
         
         local startBalance = tempBalance
         
-        -- Build transaction map by date
+
         local transactionsByDate = {}
         local runningBalance = startBalance
         
         for i = 1, #result do
             local transaction = result[i]
-            local transactionDate = string.sub(transaction.date, 1, 10) -- Get just the date part
+            local transactionDate = string.sub(transaction.date, 1, 10)
             
-            -- Apply the transaction to running balance
+
             if transaction.type == 'deposit' or transaction.type == 'transfer_in' then
                 runningBalance = runningBalance + transaction.amount
             elseif transaction.type == 'withdrawal' or transaction.type == 'transfer_out' or transaction.type == 'fee' then
                 runningBalance = runningBalance - transaction.amount
             end
             
-            -- Store the end-of-day balance for this date
+
             transactionsByDate[transactionDate] = runningBalance
         end
         
-        -- Build the final 7-day history, filling in missing days
+
         local lastKnownBalance = startBalance
         for _, date in ipairs(days) do
             if transactionsByDate[date] then
@@ -312,14 +310,12 @@ RegisterCallback('omes_banking:getBalanceHistory', function(source, cb)
             })
         end
         
-        -- Ensure today shows current balance
         balanceHistory[#balanceHistory].balance = currentBalance
         
         cb(balanceHistory)
     end)
 end)
 
--- Deposit money
 RegisterServerEvent('omes_banking:deposit')
 AddEventHandler('omes_banking:deposit', function(amount)
     local source = source
@@ -349,10 +345,8 @@ AddEventHandler('omes_banking:deposit', function(amount)
     
     SendNotification(source, 'Deposited $' .. FormatMoney(amount), 'success')
     
-    -- Log transaction
     LogTransaction(GetPlayerIdentifier(xPlayer), 'deposit', amount, 'Cash deposit')
     
-    -- Discord logging
     SendDiscordLog('deposits', '💰 Cash Deposit', 
         'A player has made a cash deposit to their bank account.',
         {
@@ -376,7 +370,6 @@ AddEventHandler('omes_banking:deposit', function(amount)
     )
 end)
 
--- Withdraw money
 RegisterServerEvent('omes_banking:withdraw')
 AddEventHandler('omes_banking:withdraw', function(amount)
     local source = source
@@ -406,10 +399,8 @@ AddEventHandler('omes_banking:withdraw', function(amount)
     
     SendNotification(source, 'Withdrew $' .. FormatMoney(amount), 'success')
     
-    -- Log transaction
     LogTransaction(GetPlayerIdentifier(xPlayer), 'withdrawal', amount, 'Cash withdrawal')
     
-    -- Discord logging
     SendDiscordLog('withdrawals', '💸 Cash Withdrawal', 
         'A player has withdrawn cash from their bank account.',
         {
@@ -433,7 +424,6 @@ AddEventHandler('omes_banking:withdraw', function(amount)
     )
 end)
 
--- Transfer money
 RegisterServerEvent('omes_banking:transfer')
 AddEventHandler('omes_banking:transfer', function(targetId, amount, description)
     local source = source
@@ -477,11 +467,9 @@ AddEventHandler('omes_banking:transfer', function(targetId, amount, description)
         return
     end
     
-    -- Process transfer
     RemovePlayerBank(xPlayer, totalAmount)
     AddPlayerBank(xTarget, amount)
     
-    -- Notifications
     local senderMsg = 'Transferred $' .. FormatMoney(amount) .. ' to ' .. GetPlayerName(xTarget)
     if transferFee > 0 then
         senderMsg = senderMsg .. ' (Fee: $' .. FormatMoney(transferFee) .. ')'
@@ -490,11 +478,9 @@ AddEventHandler('omes_banking:transfer', function(targetId, amount, description)
     SendNotification(source, senderMsg, 'success')
     SendNotification(targetId, 'Received $' .. FormatMoney(amount) .. ' from ' .. GetPlayerName(xPlayer), 'success')
     
-    -- Log transactions
     LogTransaction(GetPlayerIdentifier(xPlayer), 'transfer_out', amount, 'Transfer to ' .. GetPlayerName(xTarget) .. ': ' .. (description or 'No description'))
     LogTransaction(GetPlayerIdentifier(xTarget), 'transfer_in', amount, 'Transfer from ' .. GetPlayerName(xPlayer) .. ': ' .. (description or 'No description'))
     
-    -- Discord logging
     SendDiscordLog('transfers', '💳 Bank Transfer', 
         'A player has transferred money to another player.',
         {
@@ -542,11 +528,10 @@ AddEventHandler('omes_banking:transfer', function(targetId, amount, description)
     end
 end)
 
--- Function to log transactions (you can expand this to save to database)
 function LogTransaction(identifier, type, amount, description)
     if not Config.Banking.enableTransactionHistory then return end
     
-    -- Save to database
+
     MySQL.Async.execute('INSERT INTO banking_transactions (identifier, type, amount, description, date) VALUES (@identifier, @type, @amount, @description, NOW())', {
         ['@identifier'] = identifier,
         ['@type'] = type,
@@ -559,7 +544,7 @@ function LogTransaction(identifier, type, amount, description)
     end)
 end
 
--- Command to open banking (for testing or admin use)
+
 if FrameworkName == 'esx' then
     RegisterCommand('bank', 'user', function(xPlayer, args, showError)
         TriggerClientEvent('omes_banking:openUI', xPlayer.source)
@@ -570,7 +555,7 @@ elseif FrameworkName == 'qb' then
     end, 'user')
 end
 
--- Open savings account
+
 RegisterServerEvent('omes_banking:openSavingsAccount')
 AddEventHandler('omes_banking:openSavingsAccount', function()
     local source = source
@@ -580,7 +565,7 @@ AddEventHandler('omes_banking:openSavingsAccount', function()
     
     local identifier = GetPlayerIdentifier(xPlayer)
     
-    -- Check if player already has a savings account
+
     MySQL.Async.fetchScalar('SELECT status FROM banking_savings WHERE identifier = @identifier', {
         ['@identifier'] = identifier
     }, function(status)
@@ -590,7 +575,7 @@ AddEventHandler('omes_banking:openSavingsAccount', function()
         end
         
         if status == 'inactive' then
-            -- Reactivate existing account
+
             MySQL.Async.execute('UPDATE banking_savings SET status = "active" WHERE identifier = @identifier', {
                 ['@identifier'] = identifier
             }, function(rowsChanged)
@@ -598,7 +583,7 @@ AddEventHandler('omes_banking:openSavingsAccount', function()
                     SendNotification(source, 'Savings account reactivated successfully!', 'success')
                     LogTransaction(identifier, 'savings_opened', 0, 'Savings account reactivated')
                     
-                    -- Discord logging
+
                     SendDiscordLog('accountOperations', '🏦 Savings Account Reactivated', 
                         'A player has reactivated their savings account.',
                         {
@@ -618,7 +603,7 @@ AddEventHandler('omes_banking:openSavingsAccount', function()
                 end
             end)
         else
-            -- Create new savings account
+
             MySQL.Async.execute('INSERT INTO banking_savings (identifier, balance, status) VALUES (@identifier, 0, "active")', {
                 ['@identifier'] = identifier
             }, function(rowsChanged)
@@ -626,7 +611,7 @@ AddEventHandler('omes_banking:openSavingsAccount', function()
                     SendNotification(source, 'Savings account opened successfully!', 'success')
                     LogTransaction(identifier, 'savings_opened', 0, 'New savings account opened')
                     
-                    -- Discord logging
+
                     SendDiscordLog('accountOperations', '🏦 New Savings Account Opened', 
                         'A player has opened a new savings account.',
                         {
@@ -649,7 +634,7 @@ AddEventHandler('omes_banking:openSavingsAccount', function()
     end)
 end)
 
--- Deposit to savings account
+
 RegisterServerEvent('omes_banking:depositSavings')
 AddEventHandler('omes_banking:depositSavings', function(amount)
     local source = source
@@ -670,7 +655,7 @@ AddEventHandler('omes_banking:depositSavings', function(amount)
         return
     end
     
-    -- Check if savings account exists and is active
+
     MySQL.Async.fetchScalar('SELECT status FROM banking_savings WHERE identifier = @identifier', {
         ['@identifier'] = identifier
     }, function(status)
@@ -685,7 +670,7 @@ AddEventHandler('omes_banking:depositSavings', function(amount)
             return
         end
         
-        -- Transfer from checking to savings
+
         RemovePlayerBank(xPlayer, amount)
         
         MySQL.Async.execute('UPDATE banking_savings SET balance = balance + @amount WHERE identifier = @identifier', {
@@ -700,7 +685,7 @@ AddEventHandler('omes_banking:depositSavings', function(amount)
     end)
 end)
 
--- Withdraw from savings account
+
 RegisterServerEvent('omes_banking:withdrawSavings')
 AddEventHandler('omes_banking:withdrawSavings', function(amount)
     local source = source
@@ -721,7 +706,7 @@ AddEventHandler('omes_banking:withdrawSavings', function(amount)
         return
     end
     
-    -- Check savings balance
+
     MySQL.Async.fetchScalar('SELECT balance FROM banking_savings WHERE identifier = @identifier AND status = "active"', {
         ['@identifier'] = identifier
     }, function(savingsBalance)
@@ -735,7 +720,7 @@ AddEventHandler('omes_banking:withdrawSavings', function(amount)
             return
         end
         
-        -- Transfer from savings to checking
+
         MySQL.Async.execute('UPDATE banking_savings SET balance = balance - @amount WHERE identifier = @identifier', {
             ['@identifier'] = identifier,
             ['@amount'] = amount
@@ -749,7 +734,7 @@ AddEventHandler('omes_banking:withdrawSavings', function(amount)
     end)
 end)
 
--- Transfer between accounts (checking <-> savings)
+
 RegisterServerEvent('omes_banking:transferBetweenAccounts')
 AddEventHandler('omes_banking:transferBetweenAccounts', function(fromAccount, toAccount, amount)
     local source = source
@@ -775,7 +760,7 @@ AddEventHandler('omes_banking:transferBetweenAccounts', function(fromAccount, to
         return
     end
     
-    -- Get current balances
+
     local checkingBalance = GetPlayerBank(xPlayer)
     
     MySQL.Async.fetchScalar('SELECT balance FROM banking_savings WHERE identifier = @identifier AND status = "active"', {
@@ -792,7 +777,7 @@ AddEventHandler('omes_banking:transferBetweenAccounts', function(fromAccount, to
                 return
             end
             
-            -- Transfer from checking to savings
+
             RemovePlayerBank(xPlayer, amount)
             MySQL.Async.execute('UPDATE banking_savings SET balance = balance + @amount WHERE identifier = @identifier', {
                 ['@identifier'] = identifier,
@@ -802,7 +787,7 @@ AddEventHandler('omes_banking:transferBetweenAccounts', function(fromAccount, to
                     SendNotification(source, 'Transferred $' .. FormatMoney(amount) .. ' from checking to savings', 'success')
                     LogTransaction(identifier, 'account_transfer', amount, 'Transfer from checking to savings')
                     
-                    -- Discord logging
+
                     SendDiscordLog('savingsOperations', '💰 Account Transfer', 
                         'A player has transferred money from checking to savings.',
                         {
@@ -838,7 +823,7 @@ AddEventHandler('omes_banking:transferBetweenAccounts', function(fromAccount, to
                 return
             end
             
-            -- Transfer from savings to checking
+
             MySQL.Async.execute('UPDATE banking_savings SET balance = balance - @amount WHERE identifier = @identifier', {
                 ['@identifier'] = identifier,
                 ['@amount'] = amount
@@ -848,7 +833,7 @@ AddEventHandler('omes_banking:transferBetweenAccounts', function(fromAccount, to
                     SendNotification(source, 'Transferred $' .. FormatMoney(amount) .. ' from savings to checking', 'success')
                     LogTransaction(identifier, 'account_transfer', amount, 'Transfer from savings to checking')
                     
-                    -- Discord logging
+
                     SendDiscordLog('savingsOperations', '💰 Account Transfer', 
                         'A player has transferred money from savings to checking.',
                         {
@@ -881,7 +866,7 @@ AddEventHandler('omes_banking:transferBetweenAccounts', function(fromAccount, to
     end)
 end)
 
--- Close savings account
+
 RegisterServerEvent('omes_banking:closeSavingsAccount')
 AddEventHandler('omes_banking:closeSavingsAccount', function()
     local source = source
@@ -893,7 +878,7 @@ AddEventHandler('omes_banking:closeSavingsAccount', function()
     
     print(string.format('[BANKING] Player %s (%s) attempting to close savings account', GetPlayerName(xPlayer), identifier))
     
-    -- Get current savings balance and status
+
     MySQL.Async.fetchAll('SELECT balance, status FROM banking_savings WHERE identifier = @identifier', {
         ['@identifier'] = identifier
     }, function(result)
@@ -914,14 +899,14 @@ AddEventHandler('omes_banking:closeSavingsAccount', function()
             return
         end
         
-        -- Transfer all savings money to checking account
+
         if savingsBalance > 0 then
             AddPlayerBank(xPlayer, savingsBalance)
             LogTransaction(identifier, 'account_transfer', savingsBalance, 'Savings account closure - transferred to checking')
             print(string.format('[BANKING] Transferred %s from savings to checking for %s', savingsBalance, identifier))
         end
         
-        -- Close the savings account by setting status to inactive and balance to 0
+
         MySQL.Async.execute('UPDATE banking_savings SET status = @status, balance = @balance WHERE identifier = @identifier', {
             ['@identifier'] = identifier,
             ['@status'] = 'inactive',
@@ -937,7 +922,7 @@ AddEventHandler('omes_banking:closeSavingsAccount', function()
                 SendNotification(source, message, 'success')
                 LogTransaction(identifier, 'savings_closed', 0, 'Savings account closed')
                 
-                -- Discord logging
+
                 SendDiscordLog('accountOperations', '🏦 Savings Account Closed', 
                     'A player has closed their savings account.',
                     {
@@ -960,7 +945,7 @@ AddEventHandler('omes_banking:closeSavingsAccount', function()
                     Config.DiscordLogging.color.admin
                 )
                 
-                -- Refresh player data on client side
+
                 TriggerClientEvent('omes_banking:savingsAccountClosed', source)
                 
                 print(string.format('[BANKING] Successfully closed savings account for %s', identifier))
@@ -972,14 +957,14 @@ AddEventHandler('omes_banking:closeSavingsAccount', function()
     end)
 end)
 
--- Client event to open UI
+
 RegisterServerEvent('omes_banking:openUI')
 AddEventHandler('omes_banking:openUI', function()
     local source = source
     TriggerClientEvent('omes_banking:openUI', source)
 end)
 
--- Setup PIN
+
 RegisterServerEvent('omes_banking:setupPin')
 AddEventHandler('omes_banking:setupPin', function(pin)
     local source = source
@@ -994,22 +979,22 @@ AddEventHandler('omes_banking:setupPin', function(pin)
         return
     end
     
-    -- Check if PIN already exists
+
     MySQL.Async.fetchScalar('SELECT pin FROM banking_pins WHERE identifier = @identifier', {
         ['@identifier'] = identifier
     }, function(existingPin)
         if existingPin then
-            -- Update existing PIN
+
             MySQL.Async.execute('UPDATE banking_pins SET pin = @pin WHERE identifier = @identifier', {
                 ['@identifier'] = identifier,
                 ['@pin'] = pin
             }, function(rowsChanged)
                 if rowsChanged > 0 then
                     SendNotification(source, 'PIN updated successfully', 'success')
-                    -- Send success response to NUI
+
                     TriggerClientEvent('omes_banking:pinSetupSuccess', source, { pin = pin })
                     
-                    -- Discord logging
+
                     SendDiscordLog('pinOperations', '🔐 PIN Updated', 
                         'A player has updated their banking PIN.',
                         {
@@ -1029,17 +1014,17 @@ AddEventHandler('omes_banking:setupPin', function(pin)
                 end
             end)
         else
-            -- Create new PIN
+
             MySQL.Async.execute('INSERT INTO banking_pins (identifier, pin) VALUES (@identifier, @pin)', {
                 ['@identifier'] = identifier,
                 ['@pin'] = pin
             }, function(rowsChanged)
                 if rowsChanged > 0 then
                     SendNotification(source, 'PIN set up successfully', 'success')
-                    -- Send success response to NUI
+
                     TriggerClientEvent('omes_banking:pinSetupSuccess', source, { pin = pin })
                     
-                    -- Discord logging
+
                     SendDiscordLog('pinOperations', '🔐 PIN Created', 
                         'A player has created a new banking PIN.',
                         {
@@ -1062,7 +1047,7 @@ AddEventHandler('omes_banking:setupPin', function(pin)
     end)
 end)
 
--- Verify PIN for ATM access
+
 RegisterCallback('omes_banking:verifyPin', function(source, cb, enteredPin)
     local xPlayer = GetPlayer(source)
     if not xPlayer then return cb(false) end
@@ -1080,7 +1065,7 @@ RegisterCallback('omes_banking:verifyPin', function(source, cb, enteredPin)
     end)
 end)
 
--- Clear all transactions
+
 RegisterServerEvent('omes_banking:clearAllTransactions')
 AddEventHandler('omes_banking:clearAllTransactions', function()
     local source = source
@@ -1096,7 +1081,7 @@ AddEventHandler('omes_banking:clearAllTransactions', function()
         if rowsChanged > 0 then
             SendNotification(source, 'All transaction history cleared (' .. rowsChanged .. ' transactions deleted)', 'success')
             
-            -- Discord logging
+            
             SendDiscordLog('historyClearing', '🗑️ Transaction History Cleared', 
                 'A player has cleared their entire transaction history.',
                 {
