@@ -3,7 +3,7 @@ const { useState, useEffect, useRef } = React;
 const BankingApp = () => {
     const [isVisible, setIsVisible] = useState(false);
     const [activeTab, setActiveTab] = useState('overview');
-    const [bankName, setBankName] = useState('Bank');
+    const [bankName, setBankName] = useState('銀行');
     const [savingsAccountOpened, setSavingsAccountOpened] = useState(false);
     const [isATMMode, setIsATMMode] = useState(false);
     const [playerData, setPlayerData] = useState({
@@ -123,7 +123,7 @@ const BankingApp = () => {
                 setIsVisible(true);
                 setIsATMMode(data.isATM || false); // Set ATM mode based on flag
                 setPlayerData(data.playerData || playerData);
-                setBankName(data.bankName || 'Bank');
+                setBankName(data.bankName || '銀行');
                 setTransactions(data.transactions || []);
                 setBalanceHistory(data.balanceHistory || []);
                 
@@ -158,7 +158,7 @@ const BankingApp = () => {
                 setAtmPin('');
                 setAtmPinError('');
             } else if (data.type === 'pinVerificationFailed') {
-                setAtmPinError('Incorrect PIN. Please try again.');
+                setAtmPinError('PINが正しくありません。再試行してください。');
                 setAtmPin('');
                 setTimeout(() => {
                     setAtmPinError('');
@@ -264,11 +264,11 @@ const BankingApp = () => {
             
             // Format dates more clearly
             if (date.toDateString() === today.toDateString()) {
-                return 'Today';
+                return '今日';
             } else if (date.toDateString() === yesterday.toDateString()) {
-                return 'Yesterday';
+                return '昨日';
             } else {
-                return date.toLocaleDateString('en-US', { 
+                return date.toLocaleDateString('ja-JP', { 
                     weekday: 'short',
                     month: 'short', 
                     day: 'numeric' 
@@ -283,7 +283,7 @@ const BankingApp = () => {
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Account Balance',
+                    label: '口座残高',
                     data: data,
                     borderColor: '#22c55e',
                     backgroundColor: createDiagonalPattern(),
@@ -520,7 +520,7 @@ const BankingApp = () => {
                 });
             } else {
                 // PIN doesn't match, show error and reset to setup
-                setPinError('PINs do not match. Please try again.');
+                setPinError('PINが一致しません。再試行してください。');
                 setPinStep('setup');
                 setEnteredPin('');
                 setConfirmPin('');
@@ -671,15 +671,15 @@ const BankingApp = () => {
         // Check if date is valid
         if (isNaN(date.getTime())) {
             console.error('Invalid date string:', dateString);
-            return { date: 'Invalid Date', time: 'Invalid Time' };
+            return { date: '無効な日付', time: '無効な時間' };
         }
         
-        const dateStr = date.toLocaleDateString('en-US', {
+        const dateStr = date.toLocaleDateString('ja-JP', {
             year: 'numeric',
             month: '2-digit',
             day: '2-digit'
         });
-        const timeStr = date.toLocaleTimeString('en-US', {
+        const timeStr = date.toLocaleTimeString('ja-JP', {
             hour: '2-digit',
             minute: '2-digit',
             hour12: false
@@ -749,18 +749,18 @@ const BankingApp = () => {
                         <div className="card-background">
                             <div className="card-header">
                                 <div className="bank-name">{bankName}</div>
-                                <div className="card-type">DEBIT</div>
+                                <div className="card-type">デビット</div>
                             </div>
                             <div className="card-number">
                                 <span>•••• •••• •••• {generateCardNumber(playerData.name || 'default')}</span>
                             </div>
                             <div className="card-footer">
                                 <div className="card-holder">
-                                    <div className="label">CARD HOLDER</div>
-                                    <div className="name">{playerData.name || 'Unknown'}</div>
+                                    <div className="label">カード所有者</div>
+                                    <div className="name">{playerData.name || '不明'}</div>
                                 </div>
                                 <div className="card-balance">
-                                    <div className="label">BALANCE</div>
+                                    <div className="label">残高</div>
                                     <div className="amount">{formatCurrency(playerData.balance || 0)}</div>
                                 </div>
                             </div>
@@ -770,12 +770,12 @@ const BankingApp = () => {
                 
                 <div className="atm-info-section">
                     <div className="atm-balance-display">
-                        <div className="balance-label-small">Available Balance</div>
+                        <div className="balance-label-small">利用可能残高</div>
                         <div className="balance-amount-small">{formatCurrency(playerData.balance || 0)}</div>
                     </div>
                     
                     <div className="transaction-history">
-                        <h3 className="section-title">Recent Transactions</h3>
+                        <h3 className="section-title">最近の取引</h3>
                         {transactions.length > 0 ? (
                             transactions.slice(0, 3).map(transaction => {
                                 const { date, time } = formatTransactionDate(transaction.date);
@@ -788,7 +788,7 @@ const BankingApp = () => {
                                             </div>
                                             <div className="transaction-details">
                                                 <h4>{transaction.description}</h4>
-                                                <p>{date} at {time}</p>
+                                                <p>{date} {time}</p>
                                             </div>
                                         </div>
                                         <div className={`transaction-amount ${amount < 0 ? 'negative' : ''}`}>
@@ -800,8 +800,8 @@ const BankingApp = () => {
                         ) : (
                             <div className="no-transactions-overview">
                                 <i className="fas fa-history"></i>
-                                <h3>No Recent Transactions</h3>
-                                <p>Your recent transactions will appear here</p>
+                                <h3>最近の取引なし</h3>
+                                <p>最近の取引がここに表示されます</p>
                             </div>
                         )}
                     </div>
@@ -818,18 +818,18 @@ const BankingApp = () => {
                         <div className="card-background">
                             <div className="card-header">
                                 <div className="bank-name">{bankName}</div>
-                                <div className="card-type">DEBIT</div>
+                                <div className="card-type">デビット</div>
                             </div>
                             <div className="card-number">
                                 <span>•••• •••• •••• {generateCardNumber(playerData.name || 'default')}</span>
                             </div>
                             <div className="card-footer">
                                 <div className="card-holder">
-                                    <div className="label">CARD HOLDER</div>
-                                    <div className="name">{playerData.name || 'Unknown'}</div>
+                                    <div className="label">カード所有者</div>
+                                    <div className="name">{playerData.name || '不明'}</div>
                                 </div>
                                 <div className="card-balance">
-                                    <div className="label">BALANCE</div>
+                                    <div className="label">残高</div>
                                     <div className="amount">{formatCurrency(playerData.balance || 0)}</div>
                                 </div>
                             </div>
@@ -839,14 +839,14 @@ const BankingApp = () => {
                     <div className="atm-transfer-section">
                         <div className="action-header">
                             <i className="fas fa-paper-plane"></i>
-                            <h3>Quick Transfer</h3>
+                            <h3>クイック送金</h3>
                         </div>
                         <div className="atm-transfer-form">
                             <div className="form-group-enhanced">
                                 <input
                                     type="text"
                                     className="form-input-enhanced"
-                                    placeholder="Recipient ID"
+                                    placeholder="受信者ID"
                                     value={transferData.recipient}
                                     onChange={(e) => setTransferData({...transferData, recipient: e.target.value})}
                                 />
@@ -855,7 +855,7 @@ const BankingApp = () => {
                                 <input
                                     type="number"
                                     className="form-input-enhanced"
-                                    placeholder="Amount"
+                                    placeholder="金額"
                                     value={transferData.amount}
                                     onChange={(e) => setTransferData({...transferData, amount: e.target.value})}
                                 />
@@ -864,7 +864,7 @@ const BankingApp = () => {
                                 <input
                                     type="text"
                                     className="form-input-enhanced"
-                                    placeholder="Description (optional)"
+                                    placeholder="説明 (オプション)"
                                     value={transferData.description}
                                     onChange={(e) => setTransferData({...transferData, description: e.target.value})}
                                 />
@@ -875,7 +875,7 @@ const BankingApp = () => {
                                 disabled={!transferData.recipient || !transferData.amount || parseFloat(transferData.amount) <= 0 || parseFloat(transferData.amount) > (playerData.balance || 0)}
                             >
                                 <i className="fas fa-paper-plane"></i>
-                                Send Transfer
+                                送金する
                             </button>
                         </div>
                     </div>
@@ -883,7 +883,7 @@ const BankingApp = () => {
                 
                 <div className="atm-functions-section">
                     <div className="atm-balance-display">
-                        <div className="balance-label-small">Available Balance</div>
+                        <div className="balance-label-small">利用可能残高</div>
                         <div className="balance-amount-small">{formatCurrency(playerData.balance || 0)}</div>
                     </div>
                     
@@ -892,7 +892,7 @@ const BankingApp = () => {
                             <div className="atm-action-card withdraw-card">
                                 <div className="action-header">
                                     <i className="fas fa-minus"></i>
-                                    <h3>Withdraw Cash</h3>
+                                    <h3>現金引き出し</h3>
                                 </div>
                                 <div className="quick-amounts">
                                     {[20, 50, 100, 200, 500, 1000].map(amount => (
@@ -910,7 +910,7 @@ const BankingApp = () => {
                                     <input
                                         type="number"
                                         className="custom-amount-input"
-                                        placeholder="Other amount"
+                                        placeholder="他の金額"
                                         value={withdrawAmount}
                                         onChange={(e) => setWithdrawAmount(e.target.value)}
                                     />
@@ -919,7 +919,7 @@ const BankingApp = () => {
                                         onClick={handleWithdraw}
                                         disabled={!withdrawAmount || withdrawAmount <= 0 || withdrawAmount > (playerData.balance || 0)}
                                     >
-                                        Withdraw
+                                        引き出す
                                     </button>
                                 </div>
                             </div>
@@ -927,7 +927,7 @@ const BankingApp = () => {
                             <div className="atm-action-card deposit-card">
                                 <div className="action-header">
                                     <i className="fas fa-plus"></i>
-                                    <h3>Deposit Cash</h3>
+                                    <h3>現金預け入れ</h3>
                                 </div>
                                 <div className="quick-amounts">
                                     {[100, 500, 1000, 2500, 5000, 10000].map(amount => (
@@ -944,7 +944,7 @@ const BankingApp = () => {
                                     <input
                                         type="number"
                                         className="custom-amount-input"
-                                        placeholder="Other amount"
+                                        placeholder="他の金額"
                                         value={depositAmount}
                                         onChange={(e) => setDepositAmount(e.target.value)}
                                     />
@@ -953,7 +953,7 @@ const BankingApp = () => {
                                         onClick={handleDeposit}
                                         disabled={!depositAmount || depositAmount <= 0}
                                     >
-                                        Deposit
+                                        預け入れる
                                     </button>
                                 </div>
                             </div>
@@ -962,7 +962,7 @@ const BankingApp = () => {
                         <div className="atm-history-section">
                             <div className="action-header">
                                 <i className="fas fa-history"></i>
-                                <h3>Recent Transactions</h3>
+                                <h3>最近の取引</h3>
                             </div>
                             <div className="atm-transactions">
                                 {transactions.length > 0 ? (
@@ -989,8 +989,8 @@ const BankingApp = () => {
                                 ) : (
                                     <div className="no-transactions-overview">
                                         <i className="fas fa-history"></i>
-                                        <h3>No Recent Transactions</h3>
-                                        <p>Your recent transactions will appear here</p>
+                                        <h3>最近の取引なし</h3>
+                                        <p>最近の取引がここに表示されます</p>
                                     </div>
                                 )}
                             </div>
@@ -1013,7 +1013,7 @@ const BankingApp = () => {
                                     {!playerData.hasPin ? (
                                         <button className="pin-setup-btn" onClick={openPinModal}>
                                             <i className="fas fa-lock"></i>
-                                            Set up PIN
+                                            PINを設定
                                         </button>
                                     ) : (
                                         <div className="pin-display-section">
@@ -1028,7 +1028,7 @@ const BankingApp = () => {
                                             </span>
                                         </div>
                                     )}
-                                <div className="card-type">DEBIT</div>
+                                <div className="card-type">デビット</div>
                                 </div>
                             </div>
                             <div className="card-number">
@@ -1036,11 +1036,11 @@ const BankingApp = () => {
                             </div>
                             <div className="card-footer">
                                 <div className="card-holder">
-                                    <div className="label">CARD HOLDER</div>
-                                    <div className="name">{playerData.name || 'Unknown'}</div>
+                                    <div className="label">カード所有者</div>
+                                    <div className="name">{playerData.name || '不明'}</div>
                                 </div>
                                 <div className="card-balance">
-                                    <div className="label">BALANCE</div>
+                                    <div className="label">残高</div>
                                     <div className="amount">{formatCurrency(playerData.balance || 0)}</div>
                                 </div>
                             </div>
@@ -1051,18 +1051,18 @@ const BankingApp = () => {
                         <div className={`card-background savings-card ${!playerData.hasSavingsAccount ? 'blurred' : ''}`}>
                             <div className="card-header">
                                 <div className="bank-name">{bankName}</div>
-                                <div className="card-type">SAVINGS</div>
+                                <div className="card-type">貯蓄</div>
                             </div>
                             <div className="card-number">
                                 <span>•••• •••• •••• {generateSavingsCardNumber(playerData.name || 'default')}</span>
                             </div>
                             <div className="card-footer">
                                 <div className="card-holder">
-                                    <div className="label">CARD HOLDER</div>
-                                    <div className="name">{playerData.name || 'Unknown'}</div>
+                                    <div className="label">カード所有者</div>
+                                    <div className="name">{playerData.name || '不明'}</div>
                                 </div>
                                 <div className="card-balance">
-                                    <div className="label">BALANCE</div>
+                                    <div className="label">残高</div>
                                     <div className="amount">{formatCurrency(playerData.savingsBalance || 0)}</div>
                                 </div>
                             </div>
@@ -1073,7 +1073,7 @@ const BankingApp = () => {
                                         <div className="plus-icon">
                                             <i className="fas fa-plus"></i>
                                         </div>
-                                        <div className="overlay-text">Open Savings Account</div>
+                                        <div className="overlay-text">貯蓄口座を開設</div>
                                     </div>
                                 </div>
                             )}
@@ -1084,8 +1084,8 @@ const BankingApp = () => {
                 <div className="right-section">
                     <div className="balance-chart-container">
                         <div className="chart-title-container">
-                            <h3 className="section-title">Balance Trend</h3>
-                            <span className="time-period-tag">Last 7 Days</span>
+                            <h3 className="section-title">残高の推移</h3>
+                            <span className="time-period-tag">過去7日間</span>
                         </div>
                         <div className="chart-wrapper">
                             <canvas ref={chartRef} id="balanceChart"></canvas>
@@ -1093,7 +1093,7 @@ const BankingApp = () => {
                     </div>
                     
                     <div className="transaction-history">
-                        <h3 className="section-title">Recent Transactions</h3>
+                        <h3 className="section-title">最近の取引</h3>
                         {transactions.length > 0 ? (
                             transactions.slice(0, 5).map(transaction => {
                                 const { date, time } = formatTransactionDate(transaction.date);
@@ -1106,7 +1106,7 @@ const BankingApp = () => {
                                     </div>
                                     <div className="transaction-details">
                                         <h4>{transaction.description}</h4>
-                                                <p>{date} at {time}</p>
+                                                <p>{date} {time}</p>
                                             </div>
                                         </div>
                                         <div className={`transaction-amount ${amount < 0 ? 'negative' : ''}`}>
@@ -1118,8 +1118,8 @@ const BankingApp = () => {
                         ) : (
                             <div className="no-transactions-overview">
                                 <i className="fas fa-history"></i>
-                                <h3>No Recent Transactions</h3>
-                                <p>Your recent transactions will appear here</p>
+                                <h3>最近の取引なし</h3>
+                                <p>最近の取引がここに表示されます</p>
                             </div>
                         )}
                     </div>
@@ -1137,19 +1137,19 @@ const BankingApp = () => {
         return (
             <div className="transfer-layout">
                 <div className="transfer-form-section">
-                    <h3 className="section-title">Send Money</h3>
+                    <h3 className="section-title">送金</h3>
                     <div className="form-group-enhanced">
-                        <label className="form-label-enhanced">Recipient ID</label>
+                        <label className="form-label-enhanced">受信者ID</label>
                 <input
                     type="text"
                             className="form-input-enhanced"
-                            placeholder="Enter player ID or username"
+                            placeholder="プレイヤーIDまたはユーザー名を入力"
                     value={transferData.recipient}
                     onChange={(e) => setTransferData({...transferData, recipient: e.target.value})}
                 />
             </div>
                     <div className="form-group-enhanced">
-                        <label className="form-label-enhanced">Amount</label>
+                        <label className="form-label-enhanced">金額</label>
                 <input
                     type="text"
                             className="form-input-enhanced"
@@ -1159,11 +1159,11 @@ const BankingApp = () => {
                 />
             </div>
                     <div className="form-group-enhanced">
-                        <label className="form-label-enhanced">Description (Optional)</label>
+                        <label className="form-label-enhanced">説明 (オプション)</label>
                 <input
                     type="text"
                             className="form-input-enhanced"
-                            placeholder="What's this transfer for?"
+                            placeholder="この送金の目的は？"
                     value={transferData.description}
                     onChange={(e) => setTransferData({...transferData, description: e.target.value})}
                 />
@@ -1174,18 +1174,18 @@ const BankingApp = () => {
                         disabled={!isFormValid || !hasEnoughBalance}
                     >
                 <i className="fas fa-paper-plane"></i>
-                Send Transfer
+                送金する
             </button>
                     {!hasEnoughBalance && transferAmount > 0 && (
                         <p style={{color: '#ef4444', fontSize: '14px', marginTop: '10px', textAlign: 'center'}}>
-                            Insufficient balance for this transfer
+                            この送金の残高が不足しています
                         </p>
                     )}
                 </div>
                 
                 <div className="transfer-preview-section">
                     <div className="account-balance-card">
-                        <div className="balance-label-small">Available Balance</div>
+                        <div className="balance-label-small">利用可能残高</div>
                         <div className="balance-amount-small">{formatCurrency(playerData.balance || 0)}</div>
                     </div>
                     
@@ -1194,19 +1194,19 @@ const BankingApp = () => {
                             <div className="preview-icon">
                                 <i className="fas fa-paper-plane"></i>
                             </div>
-                            <div className="preview-title">Transfer Preview</div>
+                            <div className="preview-title">送金プレビュー</div>
                         </div>
                         <div className="preview-details">
                             <div className="preview-row">
-                                <span className="preview-label">To:</span>
-                                <span className="preview-value">{transferData.recipient || 'Not specified'}</span>
+                                <span className="preview-label">宛先：</span>
+                                <span className="preview-value">{transferData.recipient || '指定なし'}</span>
                             </div>
                             <div className="preview-row">
-                                <span className="preview-label">Description:</span>
-                                <span className="preview-value">{transferData.description || 'No description'}</span>
+                                <span className="preview-label">説明：</span>
+                                <span className="preview-value">{transferData.description || '説明なし'}</span>
                             </div>
                             <div className="preview-row">
-                                <span className="preview-label">Amount:</span>
+                                <span className="preview-label">金額：</span>
                                 <span className="preview-amount">{formatCurrency(transferAmount)}</span>
                             </div>
                         </div>
@@ -1227,7 +1227,7 @@ const BankingApp = () => {
         return (
             <div className="deposit-layout">
                 <div className="deposit-form-section">
-            <h3 className="section-title">Deposit Cash</h3>
+            <h3 className="section-title">現金預け入れ</h3>
                     
                     <div className="form-group-enhanced">
                 <input
@@ -1257,13 +1257,13 @@ const BankingApp = () => {
                         disabled={!isValidAmount}
                     >
                 <i className="fas fa-plus"></i>
-                Deposit Cash
+                現金を預け入れる
             </button>
                 </div>
                 
                 <div className="deposit-info-section">
                     <div className="account-balance-card">
-                        <div className="balance-label-small">Available Balance</div>
+                        <div className="balance-label-small">利用可能残高</div>
                         <div className="balance-amount-small">{formatCurrency(playerData.balance || 0)}</div>
                     </div>
                     
@@ -1272,16 +1272,16 @@ const BankingApp = () => {
                             <div className="preview-icon">
                                 <i className="fas fa-plus"></i>
                             </div>
-                            <div className="preview-title">Deposit Preview</div>
+                            <div className="preview-title">預け入れプレビュー</div>
                         </div>
                         
                         <div className="preview-details">
                             <div className="preview-row">
-                                <span className="preview-label">Deposit Amount:</span>
+                                <span className="preview-label">預け入れ金額：</span>
                                 <span className="preview-amount">{formatCurrency(depositValue)}</span>
                             </div>
                             <div className="preview-row">
-                                <span className="preview-label">New Balance:</span>
+                                <span className="preview-label">新しい残高：</span>
                                 <span className="preview-value">{formatCurrency(newBalance)}</span>
                             </div>
                         </div>
@@ -1303,7 +1303,7 @@ const BankingApp = () => {
         return (
             <div className="withdraw-layout">
                 <div className="withdraw-form-section">
-            <h3 className="section-title">Withdraw Cash</h3>
+            <h3 className="section-title">現金引き出し</h3>
                     
                     <div className="form-group-enhanced">
                 <input
@@ -1338,19 +1338,19 @@ const BankingApp = () => {
                         disabled={!isValidAmount || !hasEnoughBalance}
                     >
                 <i className="fas fa-minus"></i>
-                Withdraw Cash
+                現金を引き出す
             </button>
                     
                     {!hasEnoughBalance && withdrawValue > 0 && (
                         <p style={{color: '#ef4444', fontSize: '14px', marginTop: '10px', textAlign: 'center'}}>
-                            Insufficient balance for this withdrawal
+                            この引き出しの残高が不足しています
                         </p>
                     )}
                 </div>
                 
                 <div className="withdraw-info-section">
                     <div className="account-balance-card">
-                        <div className="balance-label-small">Available Balance</div>
+                        <div className="balance-label-small">利用可能残高</div>
                         <div className="balance-amount-small">{formatCurrency(playerData.balance || 0)}</div>
                     </div>
                     
@@ -1359,16 +1359,16 @@ const BankingApp = () => {
                             <div className="withdraw-preview-icon">
                                 <i className="fas fa-minus"></i>
                             </div>
-                            <div className="preview-title">Withdrawal Preview</div>
+                            <div className="preview-title">引き出しプレビュー</div>
                         </div>
                         
                         <div className="preview-details">
                             <div className="preview-row">
-                                <span className="preview-label">Withdrawal Amount:</span>
+                                <span className="preview-label">引き出し金額：</span>
                                 <span className="withdraw-amount">{formatCurrency(withdrawValue)}</span>
                             </div>
                             <div className="preview-row">
-                                <span className="preview-label">Remaining Balance:</span>
+                                <span className="preview-label">残りの残高：</span>
                                 <span className="preview-value">{formatCurrency(Math.max(0, newBalance))}</span>
                             </div>
                         </div>
@@ -1428,21 +1428,21 @@ const BankingApp = () => {
             <div className="history-layout">
                 <div className="history-main-section">
                     <div className="history-header">
-            <h3 className="section-title">Transaction History</h3>
+            <h3 className="section-title">取引履歴</h3>
                         <button 
                             className="clear-all-btn" 
                             onClick={handleClearAllTransactions}
                             disabled={transactions.length === 0}
                         >
                             <i className="fas fa-trash"></i>
-                            Clear All
+                            すべてクリア
                         </button>
                     </div>
                     
                     <input
                         type="text"
                         className="search-box"
-                        placeholder="Search transactions..."
+                        placeholder="取引を検索..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -1475,8 +1475,8 @@ const BankingApp = () => {
                         ) : (
                             <div className="no-transactions-enhanced">
                                 <i className="fas fa-history"></i>
-                                <h3>No transactions found</h3>
-                                <p>No transactions match your current filters.</p>
+                                <h3>取引が見つかりません</h3>
+                                <p>現在のフィルタに一致する取引はありません。</p>
                             </div>
                         )}
                     </div>
@@ -1484,44 +1484,44 @@ const BankingApp = () => {
                 
                 <div className="history-sidebar">
                     <div className="history-stats-card">
-                        <h4 className="section-title" style={{fontSize: '14px', marginBottom: '15px'}}>Summary</h4>
+                        <h4 className="section-title" style={{fontSize: '14px', marginBottom: '15px'}}>サマリー</h4>
                         <div className="stats-summary">
                             <div className="summary-item">
-                                <div className="summary-label">Total In</div>
+                                <div className="summary-label">合計入金</div>
                                 <div className="summary-value positive">{formatCurrency(stats.totalDeposits)}</div>
                             </div>
                             <div className="summary-item">
-                                <div className="summary-label">Total Out</div>
+                                <div className="summary-label">合計出金</div>
                                 <div className="summary-value negative">{formatCurrency(stats.totalWithdrawals)}</div>
                             </div>
                             <div className="summary-item">
-                                <div className="summary-label">Net Change</div>
+                                <div className="summary-label">純変動</div>
                                 <div className={`summary-value ${stats.netChange >= 0 ? 'positive' : 'negative'}`}>
                                     {formatCurrency(Math.abs(stats.netChange))}
                                 </div>
                             </div>
                             <div className="summary-item">
-                                <div className="summary-label">Transactions</div>
+                                <div className="summary-label">取引数</div>
                                 <div className="summary-value">{stats.transactionCount}</div>
                             </div>
                         </div>
                     </div>
                     
                     <div className="history-filters-card">
-                        <h4 className="section-title" style={{fontSize: '14px', marginBottom: '15px'}}>Filters</h4>
+                        <h4 className="section-title" style={{fontSize: '14px', marginBottom: '15px'}}>フィルタ</h4>
                         
                         <div className="filter-group">
-                            <label className="filter-label">Transaction Type</label>
+                            <label className="filter-label">取引タイプ</label>
                             <div className="filter-buttons">
                                 {[
-                                    {value: 'all', label: 'All'},
-                                    {value: 'deposit', label: 'Deposits'},
-                                    {value: 'withdrawal', label: 'Withdrawals'},
-                                    {value: 'transfer_in', label: 'Received'},
-                                    {value: 'transfer_out', label: 'Sent'},
-                                    {value: 'savings_deposit', label: 'Savings Deposits'},
-                                    {value: 'savings_withdrawal', label: 'Savings Withdrawals'},
-                                    {value: 'account_transfer', label: 'Account Transfers'}
+                                    {value: 'all', label: 'すべて'},
+                                    {value: 'deposit', label: '入金'},
+                                    {value: 'withdrawal', label: '出金'},
+                                    {value: 'transfer_in', label: '受信'},
+                                    {value: 'transfer_out', label: '送信'},
+                                    {value: 'savings_deposit', label: '貯蓄入金'},
+                                    {value: 'savings_withdrawal', label: '貯蓄出金'},
+                                    {value: 'account_transfer', label: '口座間送金'}
                                 ].map(filter => (
                                     <button
                                         key={filter.value}
@@ -1535,14 +1535,14 @@ const BankingApp = () => {
                         </div>
                         
                         <div className="filter-group">
-                            <label className="filter-label">Sort By</label>
+                            <label className="filter-label">並び替え</label>
                             <select 
                                 className="filter-select" 
                                 value={sortBy} 
                                 onChange={(e) => setSortBy(e.target.value)}
                             >
-                                <option value="date">Date (Newest First)</option>
-                                <option value="amount">Amount (Highest First)</option>
+                                <option value="date">日付 (新しい順)</option>
+                                <option value="amount">金額 (高い順)</option>
                             </select>
                         </div>
                     </div>
@@ -1562,7 +1562,7 @@ const BankingApp = () => {
         
         return (
             <div className="savings-layout">
-                    <h3 className="section-title">Savings Account Management</h3>
+                    <h3 className="section-title">貯蓄口座管理</h3>
                     
                 <div className="savings-modern-layout">
                     <div className="savings-left-section">
@@ -1572,7 +1572,7 @@ const BankingApp = () => {
                                 <i className="fas fa-university"></i>
                             </div>
                                 <div className="balance-info">
-                                    <div className="balance-label">Checking Account</div>
+                                    <div className="balance-label">当座預金口座</div>
                                     <div className="balance-amount">{formatCurrency(playerData.balance || 0)}</div>
                                 </div>
                         </div>
@@ -1582,7 +1582,7 @@ const BankingApp = () => {
                                 <i className="fas fa-piggy-bank"></i>
                             </div>
                                 <div className="balance-info">
-                                    <div className="balance-label">Savings Account</div>
+                                    <div className="balance-label">貯蓄口座</div>
                                     <div className="balance-amount">{formatCurrency(playerData.savingsBalance || 0)}</div>
                                 </div>
                         </div>
@@ -1591,7 +1591,7 @@ const BankingApp = () => {
                         <div className="transfer-modern-card">
                             <div className="card-header-modern">
                                 <i className="fas fa-exchange-alt"></i>
-                                <span>Account Transfer</span>
+                                <span>口座間送金</span>
                             </div>
                             
                             <div className="transfer-controls">
@@ -1643,12 +1643,12 @@ const BankingApp = () => {
                                 disabled={!numericTransferAmount || transferValue <= 0 || !hasEnoughBalance}
                             >
                                 <i className="fas fa-exchange-alt"></i>
-                                Transfer {formatCurrency(transferValue)}
+                                {formatCurrency(transferValue)} を送金
                             </button>
                             
                             {!hasEnoughBalance && transferValue > 0 && (
                                     <div className="error-message">
-                                        Insufficient balance in {fromAccount === 'checking' ? 'checking' : 'savings'} account
+                                        {fromAccount === 'checking' ? '当座預金' : '貯蓄'}口座の残高が不足しています
                                     </div>
                                 )}
                             </div>
@@ -1659,7 +1659,7 @@ const BankingApp = () => {
                         <div className="quick-actions-modern">
                             <div className="quick-action-header">
                                 <i className="fas fa-bolt"></i>
-                                <span>Quick Actions</span>
+                                <span>クイックアクション</span>
                             </div>
                             
                             <div className="action-buttons-grid">
@@ -1670,8 +1670,8 @@ const BankingApp = () => {
                             >
                                 <i className="fas fa-plus"></i>
                                     <div>
-                                        <span>Move to Savings</span>
-                                        <small>From Checking</small>
+                                        <span>貯蓄へ移動</span>
+                                        <small>当座預金から</small>
                                     </div>
                             </button>
                             
@@ -1682,8 +1682,8 @@ const BankingApp = () => {
                                 >
                                     <i className="fas fa-minus"></i>
                                     <div>
-                                        <span>Move to Checking</span>
-                                        <small>From Savings</small>
+                                        <span>当座預金へ移動</span>
+                                        <small>貯蓄から</small>
                                     </div>
                                 </button>
                                 
@@ -1693,8 +1693,8 @@ const BankingApp = () => {
                                 >
                                     <i className="fas fa-chart-line"></i>
                                     <div>
-                                        <span>Account Summary</span>
-                                        <small>View Totals</small>
+                                        <span>口座サマリー</span>
+                                        <small>合計を表示</small>
                                     </div>
                                 </button>
                                 
@@ -1704,8 +1704,8 @@ const BankingApp = () => {
                                 >
                                     <i className="fas fa-times-circle"></i>
                                     <div>
-                                        <span>Close Account</span>
-                                        <small>Savings Account</small>
+                                        <span>口座を閉鎖</span>
+                                        <small>貯蓄口座</small>
                                     </div>
                                 </button>
                             </div>
@@ -1728,7 +1728,7 @@ const BankingApp = () => {
                 <div className="pin-modal" onClick={(e) => e.stopPropagation()}>
                     <div className="pin-modal-header">
                         <h3 className="pin-modal-title">
-                            {pinStep === 'setup' ? 'Set up your PIN' : 'Confirm your PIN'}
+                            {pinStep === 'setup' ? 'PINを設定' : 'PINを確認'}
                         </h3>
                         <button className="pin-modal-close" onClick={closePinModal}>
                             <i className="fas fa-times"></i>
@@ -1746,8 +1746,8 @@ const BankingApp = () => {
                         
                         <div className="pin-description">
                             {pinStep === 'setup' 
-                                ? 'Enter a 4-digit PIN for your debit card' 
-                                : 'Re-enter your PIN to confirm'
+                                ? 'デビットカードの4桁PINを入力' 
+                                : 'PINを確認するため再入力'
                             }
                         </div>
                         
@@ -1788,14 +1788,14 @@ const BankingApp = () => {
                         
                         <div className="pin-modal-actions">
                             <button className="pin-cancel-btn" onClick={closePinModal}>
-                                Cancel
+                                キャンセル
                             </button>
                             <button 
                                 className="pin-next-btn" 
                                 onClick={handlePinNext}
                                 disabled={isNextDisabled}
                             >
-                                {pinStep === 'setup' ? 'Next' : 'Confirm'}
+                                {pinStep === 'setup' ? '次へ' : '確認'}
                             </button>
                         </div>
                     </div>
@@ -1814,7 +1814,7 @@ const BankingApp = () => {
             <div className="pin-modal-overlay" onClick={closeAtmPinEntry}>
                 <div className="pin-modal" onClick={(e) => e.stopPropagation()}>
                     <div className="pin-modal-header">
-                        <h3 className="pin-modal-title">Enter your PIN</h3>
+                        <h3 className="pin-modal-title">PINを入力</h3>
                         <button className="pin-modal-close" onClick={closeAtmPinEntry}>
                             <i className="fas fa-times"></i>
                         </button>
@@ -1830,7 +1830,7 @@ const BankingApp = () => {
                         </div>
                         
                         <div className="pin-description">
-                            Enter your 4-digit PIN to access the ATM
+                            ATMにアクセスするための4桁PINを入力
                         </div>
                         
                         {atmPinError && (
@@ -1870,14 +1870,14 @@ const BankingApp = () => {
                         
                         <div className="pin-modal-actions">
                             <button className="pin-cancel-btn" onClick={closeAtmPinEntry}>
-                                Cancel
+                                キャンセル
                             </button>
                             <button 
                                 className="pin-next-btn" 
                                 onClick={handleAtmPinSubmit}
                                 disabled={isSubmitDisabled}
                             >
-                                Submit
+                                送信
                             </button>
                         </div>
                     </div>
@@ -1894,7 +1894,7 @@ const BankingApp = () => {
             <div className="pin-modal-overlay" onClick={cancelClearTransactions}>
                 <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
                     <div className="confirm-modal-header">
-                        <h3 className="confirm-modal-title">Confirm Action</h3>
+                        <h3 className="confirm-modal-title">アクションを確認</h3>
                         <button className="pin-modal-close" onClick={cancelClearTransactions}>
                             <i className="fas fa-times"></i>
                         </button>
@@ -1906,17 +1906,17 @@ const BankingApp = () => {
                         </div>
                         
                         <div className="confirm-message">
-                            <h4>Clear All Transaction History?</h4>
-                            <p>Are you sure you want to delete all transaction history? This action cannot be undone and will permanently remove all your banking records.</p>
+                            <h4>すべての取引履歴をクリアしますか？</h4>
+                            <p>すべての取引履歴を削除しますか？このアクションは元に戻せません。すべての銀行記録が永久に削除されます。</p>
                         </div>
                         
                         <div className="confirm-modal-actions">
                             <button className="confirm-cancel-btn" onClick={cancelClearTransactions}>
-                                Cancel
+                                キャンセル
                             </button>
                             <button className="confirm-delete-btn" onClick={confirmClearTransactions}>
                                 <i className="fas fa-trash"></i>
-                                Clear All
+                                すべてクリア
                             </button>
                         </div>
                     </div>
@@ -1930,10 +1930,10 @@ const BankingApp = () => {
 
         const getModalTitle = () => {
             switch (quickActionType) {
-                case 'toSavings': return 'Move to Savings';
-                case 'toChecking': return 'Move to Checking';
-                case 'summary': return 'Account Summary';
-                default: return 'Quick Action';
+                case 'toSavings': return '貯蓄へ移動';
+                case 'toChecking': return '当座預金へ移動';
+                case 'summary': return '口座サマリー';
+                default: return 'クイックアクション';
             }
         };
 
@@ -1947,11 +1947,11 @@ const BankingApp = () => {
         };
 
         const getFromAccount = () => {
-            return quickActionType === 'toSavings' ? 'checking' : 'savings';
+            return quickActionType === 'toSavings' ? '当座預金' : '貯蓄';
         };
 
         const getToAccount = () => {
-            return quickActionType === 'toSavings' ? 'savings' : 'checking';
+            return quickActionType === 'toSavings' ? '貯蓄' : '当座預金';
         };
 
         const getMaxAmount = () => {
@@ -1978,21 +1978,21 @@ const BankingApp = () => {
                                 <div className="summary-item">
                                     <div className="summary-label">
                                         <i className="fas fa-university"></i>
-                                        Checking Account
+                                        当座預金口座
                                     </div>
                                     <div className="summary-value checking">{formatCurrency(playerData.balance || 0)}</div>
                                 </div>
                                 <div className="summary-item">
                                     <div className="summary-label">
                                         <i className="fas fa-piggy-bank"></i>
-                                        Savings Account
+                                        貯蓄口座
                                     </div>
                                     <div className="summary-value savings">{formatCurrency(playerData.savingsBalance || 0)}</div>
                                 </div>
                                 <div className="summary-item total">
                                     <div className="summary-label">
                                         <i className="fas fa-calculator"></i>
-                                        Total Balance
+                                        合計残高
                                     </div>
                                     <div className="summary-value total-value">{formatCurrency(totalBalance)}</div>
                                 </div>
@@ -2000,7 +2000,7 @@ const BankingApp = () => {
                             
                             <div className="confirm-modal-actions">
                                 <button className="confirm-cancel-btn" onClick={closeQuickActionModal}>
-                                    Close
+                                    閉じる
                                 </button>
                             </div>
                         </div>
@@ -2038,12 +2038,12 @@ const BankingApp = () => {
                                 <span className="to-account">{getToAccount().toUpperCase()}</span>
                             </div>
                             <div className="available-balance">
-                                Available: {formatCurrency(getMaxAmount())}
+                                利用可能: {formatCurrency(getMaxAmount())}
                             </div>
                         </div>
                         
                         <div className="amount-input-section">
-                            <label>Enter Amount:</label>
+                            <label>金額を入力：</label>
                                 <input
                                     type="number"
                                 className="quick-action-input"
@@ -2074,7 +2074,7 @@ const BankingApp = () => {
                         
                         <div className="confirm-modal-actions">
                             <button className="confirm-cancel-btn" onClick={closeQuickActionModal}>
-                                Cancel
+                                キャンセル
                             </button>
                             <button 
                                 className="confirm-delete-btn" 
@@ -2082,7 +2082,7 @@ const BankingApp = () => {
                                 disabled={!quickActionAmount || parseFloat(quickActionAmount) <= 0 || parseFloat(quickActionAmount) > getMaxAmount()}
                             >
                                 <i className="fas fa-exchange-alt"></i>
-                                Transfer {quickActionAmount ? formatCurrency(parseFloat(quickActionAmount)) : '$0.00'}
+                                {quickActionAmount ? formatCurrency(parseFloat(quickActionAmount)) : '$0.00'} を送金
                             </button>
                         </div>
                     </div>
@@ -2102,7 +2102,7 @@ const BankingApp = () => {
                     <div className="confirm-modal-header">
                         <h3 className="confirm-modal-title">
                             <i className="fas fa-exclamation-triangle"></i>
-                            Close Savings Account
+                            貯蓄口座を閉鎖
                         </h3>
                         <button className="pin-modal-close" onClick={closeCloseSavingsModal}>
                             <i className="fas fa-times"></i>
@@ -2115,24 +2115,24 @@ const BankingApp = () => {
                         </div>
                         
                         <div className="confirm-message">
-                            <h4>Are you sure you want to close your savings account?</h4>
+                            <h4>貯蓄口座を閉鎖しますか？</h4>
                             <p>
-                                Your current savings balance of <strong>{formatCurrency(savingsAmount)}</strong> will be 
-                                automatically transferred to your checking account.
+                                現在の貯蓄残高 <strong>{formatCurrency(savingsAmount)}</strong> は 
+                                自動的に当座預金口座に送金されます。
                             </p>
                             <p>
-                                <strong>This action cannot be undone.</strong> You will need to open a new savings account 
-                                if you wish to use savings features again.
+                                <strong>このアクションは元に戻せません。</strong> 貯蓄機能を利用するには
+                                新しい貯蓄口座を開設する必要があります。
                             </p>
                         </div>
                         
                         <div className="confirm-modal-actions">
                             <button className="confirm-cancel-btn" onClick={closeCloseSavingsModal}>
-                                Cancel
+                                キャンセル
                             </button>
                             <button className="confirm-delete-btn" onClick={handleCloseSavingsAccount}>
                                 <i className="fas fa-times-circle"></i>
-                                Close Account
+                                口座を閉鎖
                             </button>
                         </div>
                     </div>
@@ -2183,7 +2183,7 @@ const BankingApp = () => {
                             <div className="user-avatar">
                                 <i className="fas fa-user"></i>
                             </div>
-                            <span>{playerData.name || 'Guest'}</span>
+                            <span>{playerData.name || 'ゲスト'}</span>
                         </div>
                     </div>
                 </div>
@@ -2191,13 +2191,13 @@ const BankingApp = () => {
                 <div className="header-right">
                     <div className="header-actions">
                         <div className="current-time">
-                            {new Date().toLocaleTimeString('en-US', { 
+                            {new Date().toLocaleTimeString('ja-JP', { 
                                 hour: 'numeric', 
                                 minute: '2-digit',
                                 hour12: true 
                             })}
                         </div>
-                        <button className="close-btn" onClick={closeBank} title="Close">
+                        <button className="close-btn" onClick={closeBank} title="閉じる">
                             <i className="fas fa-times"></i>
                         </button>
                     </div>
@@ -2213,35 +2213,35 @@ const BankingApp = () => {
                             onClick={() => setActiveTab('overview')}
                         >
                             <i className="fas fa-home"></i>
-                            Overview
+                            概要
                         </button>
                         <button 
                             className={`tab-item ${activeTab === 'transfer' ? 'active' : ''}`}
                             onClick={() => setActiveTab('transfer')}
                         >
                             <i className="fas fa-paper-plane"></i>
-                            Transfer
+                            送金
                         </button>
                         <button 
                             className={`tab-item ${activeTab === 'deposit' ? 'active' : ''}`}
                             onClick={() => setActiveTab('deposit')}
                         >
                             <i className="fas fa-plus"></i>
-                            Deposit
+                            入金
                         </button>
                         <button 
                             className={`tab-item ${activeTab === 'withdraw' ? 'active' : ''}`}
                             onClick={() => setActiveTab('withdraw')}
                         >
                             <i className="fas fa-minus"></i>
-                            Withdraw
+                            出金
                         </button>
                         <button 
                             className={`tab-item ${activeTab === 'history' ? 'active' : ''}`}
                             onClick={() => setActiveTab('history')}
                         >
                             <i className="fas fa-history"></i>
-                            History
+                            履歴
                         </button>
                         {playerData.hasSavingsAccount && (
                             <button 
@@ -2249,7 +2249,7 @@ const BankingApp = () => {
                                 onClick={() => setActiveTab('savings')}
                             >
                                 <i className="fas fa-piggy-bank"></i>
-                                Savings
+                                貯蓄
                             </button>
                         )}
                     </div>
@@ -2273,4 +2273,4 @@ const BankingApp = () => {
     );
 };
 
-ReactDOM.render(<BankingApp />, document.getElementById('root')); 
+ReactDOM.render(<BankingApp />, document.getElementById('root'));

@@ -7,8 +7,8 @@ Config.Framework = 'qb' -- Options: 'esx', 'qb'
 Config.NotificationType = 'ox' -- Options: 'esx', 'ox', 'qb'
 
 -- General Settings
-Config.Locale = 'en'
-Config.BankName = 'Fleeca Bank' -- Configurable bank name displayed in UI
+Config.Locale = 'ja'
+Config.BankName = 'フリーカ銀行' -- Configurable bank name displayed in UI
 
 -- Blip Configuration
 Config.Blips = {
@@ -35,8 +35,8 @@ Config.BankerPed = {
 Config.Interaction = {
     distance = 3.0, -- Distance to show interaction prompt
     key = 38, -- E key
-    helpText = 'Press [E] to access banking',
-    accessText = 'Banking system accessed!'
+    helpText = '[E]を押して銀行システムにアクセスする',
+    accessText = '銀行システムにアクセス！'
 }
 
 -- Banking Settings
@@ -45,7 +45,7 @@ Config.Banking = {
     enableBankerPed = true,
     enableNUI = true,
     defaultAccount = 'bank',
-    maxTransferAmount = 1000000,
+    maxTransferAmount = 1000000000000,
     minTransferAmount = 1,
     transferFee = 0, -- Percentage fee for transfers (0 = no fee)
     enableTransactionHistory = true,
@@ -54,9 +54,9 @@ Config.Banking = {
 
 -- Discord Webhook Logging
 Config.DiscordLogging = {
-    enabled = true, -- Set to false to disable Discord logging
+    enabled = false, -- Set to false to disable Discord logging
     webhook = "", -- Your Discord webhook URL here
-    botName = "Banking System",
+    botName = "銀行システム",
     botAvatar = "https://i.ibb.co/Q7ddTp9S/images.png", -- Custom avatar URL
     color = {
         deposit = 3066993, 
