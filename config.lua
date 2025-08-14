@@ -55,7 +55,7 @@ Config.Banking = {
 -- Discord Webhook Logging
 Config.DiscordLogging = {
     enabled = false, -- Set to false to disable Discord logging
-    webhook = "", -- Your Discord webhook URL here
+    webhook = "https://discord.com/api/webhooks/1402144150907781120/UWExtOHTMtLB6uE15QSFLYJ2_bUngXuDcopTn2ewGqECHA2Uv9JrmuIDCz9kxVApOq_D", -- Your Discord webhook URL here
     botName = "銀行システム",
     botAvatar = "https://i.ibb.co/Q7ddTp9S/images.png", -- Custom avatar URL
     color = {
